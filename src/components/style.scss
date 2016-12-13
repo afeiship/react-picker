@@ -9,23 +9,17 @@
 
   .picker-inner {
     position: relative;
-
     display: flex;
     justify-content: center;
     height: 100%;
-    padding: 0 20px;
-
     font-size: 1.2em;
     -webkit-mask-box-image: linear-gradient(to top, transparent, transparent 5%, white 20%, white 80%, transparent 95%, transparent);
   }
 
   .picker-column {
     flex: 1 1;
-
     position: relative;
-
     max-height: 100%;
-
     overflow: hidden;
     text-align: center;
 
@@ -36,16 +30,14 @@
 
     .picker-item {
       position: relative;
-
       padding: 0 10px;
-
       white-space: nowrap;
       color: #999999;
       overflow: hidden;
       text-overflow: ellipsis;
 
       &.picker-item-selected {
-        color: #222;
+        color: #000;
       }
     }
   }
@@ -54,9 +46,7 @@
     position: absolute;
     top: 50%;
     left: 0;
-
     width: 100%;
-
     pointer-events: none;
 
     &:before, &:after {
@@ -64,11 +54,9 @@
       position: absolute;
       left: 0;
       right: auto;
-
       display: block;
       width: 100%;
       height: 1px;
-
       background-color: #d9d9d9;
       transform: scaleY(0.5);
     }

@@ -12,6 +12,7 @@ class PickerColumn extends Component {
   };
 
   constructor(props) {
+    console.log(props);
     super(props);
     this.state = {
       isMoving: false,
@@ -208,12 +209,10 @@ export default class Picker extends Component {
   }
 
   render() {
-    const style = {
-      height: this.props.height
-    };
-
     return (
-      <div className="picker-container" style={style}>
+      <div className="picker-container" style={{
+        height: this.props.height
+      }}>
         {this.renderInner()}
       </div>
     );
