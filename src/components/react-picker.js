@@ -1,7 +1,9 @@
-import {Component, PropTypes} from 'react';
 import './style.scss';
 
-class PickerColumn extends Component {
+import PropTypes from 'prop-types';
+import {PureComponent} from 'react';
+
+class PickerColumn extends PureComponent {
   static propTypes = {
     options: PropTypes.array.isRequired,
     name: PropTypes.string.isRequired,
@@ -167,7 +169,7 @@ class PickerColumn extends Component {
   }
 }
 
-export default class Picker extends Component {
+export default class Picker extends PureComponent {
   static propTyps = {
     optionGroups: PropTypes.object.isRequired,
     valueGroups: PropTypes.object.isRequired,
