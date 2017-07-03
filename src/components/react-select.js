@@ -6,7 +6,6 @@ import {PureComponent} from 'react';
 export default class extends PureComponent {
   static propTypes = {
     items: PropTypes.array,
-    name: PropTypes.string,
     value: PropTypes.any,
     itemHeight: PropTypes.number,
     columnHeight: PropTypes.number,
@@ -18,6 +17,57 @@ export default class extends PureComponent {
     columnHeight: 200
   };
 
+  get itemStyle() {
+    const {itemHeight} = this.props;
+    return {
+      height: itemHeight + 'px',
+      lineHeight: itemHeight + 'px'
+    }
+  }
+
+  get highlightStyle() {
+    const {itemHeight} = this.props;
+    return {
+      height: itemHeight,
+      marginTop: -(itemHeight / 2)
+    }
+  }
+
+  get rootStyle() {
+    const {columnHeight} = this.props;
+    const translateString = `translate3d(0, ${this.state.translate}px, 0)`;
+    const isMoving = this._isMoving;
+    return {
+      height: columnHeight,
+      WebkitTransform: translateString,
+      transform: translateString,
+      transitionDuration: isMoving ? '0ms' : null
+    };
+  }
+
+  getActiveIndex(inProps) {
+    const {value, items} = inProps;
+    let activeIndex = -1;
+    items.forEach((item, index) => {
+      if (item.value === value) {
+        activeIndex = index;
+      }
+    });
+    return activeIndex;
+  }
+
+  getNextScrollerTranslate(inCurrentY) {
+    const {startTouchY} = this.state;
+    const {startScrollerTranslate, minTranslate, maxTranslate}  = this.state;
+    let nextScrollerTranslate = startScrollerTranslate + inCurrentY - startTouchY;
+    if (nextScrollerTranslate < minTranslate) {
+      nextScrollerTranslate = minTranslate - Math.pow(minTranslate - nextScrollerTranslate, 0.8);
+    } else if (nextScrollerTranslate > maxTranslate) {
+      nextScrollerTranslate = maxTranslate + Math.pow(nextScrollerTranslate - maxTranslate, 0.8);
+    }
+    return nextScrollerTranslate;
+  }
+
   constructor(props) {
     super(props);
     this.state = {
@@ -28,51 +78,52 @@ export default class extends PureComponent {
     };
   }
 
+  reset() {
+    this._isMoving = false;
+    this._startY = 0;
+    this._startTranslate = 0;
+    this._offsetY = 0;
+  }
+
   componentWillReceiveProps(nextProps) {
-    if (this.state.isMoving) {
+    if (this._isMoving) {
       return;
     }
     this.setState(this.computeTranslate(nextProps));
   }
 
-  computeTranslate = (props) => {
-    const {items, value, itemHeight, columnHeight} = props;
+  computeTranslate(inProps) {
+    const {items, value, itemHeight, columnHeight} = inProps;
     let selectedIndex = items.indexOf(value);
     if (selectedIndex < 0) {
       // throw new ReferenceError();
-      console.warn('Warning: "' + this.props.name + '" doesn\'t contain an option of "' + value + '".');
       this.onValueSelected(items[0]);
       selectedIndex = 0;
     }
     return {
-      scrollerTranslate: columnHeight / 2 - itemHeight / 2 - selectedIndex * itemHeight,
+      translate: columnHeight / 2 - itemHeight / 2 - selectedIndex * itemHeight,
       minTranslate: columnHeight / 2 - itemHeight * items.length + itemHeight / 2,
       maxTranslate: columnHeight / 2 - itemHeight / 2
     };
   };
 
   onValueSelected = (newValue) => {
-    this.props.onChange( newValue);
+    this.props.onChange(newValue);
   };
 
   handleTouchStart = (event) => {
     const startTouchY = event.targetTouches[0].pageY;
-    this.setState(({scrollerTranslate}) => ({
+    this.setState(({translate}) => ({
       startTouchY,
-      startScrollerTranslate: scrollerTranslate
+      startScrollerTranslate: translate
     }));
   };
 
   handleTouchMove = (event) => {
     event.preventDefault();
     const touchY = event.targetTouches[0].pageY;
+    this._isMoving = true;
     this.setState(({isMoving, startTouchY, startScrollerTranslate, minTranslate, maxTranslate}) => {
-      if (!isMoving) {
-        return {
-          isMoving: true
-        }
-      }
-
       let nextScrollerTranslate = startScrollerTranslate + touchY - startTouchY;
       if (nextScrollerTranslate < minTranslate) {
         nextScrollerTranslate = minTranslate - Math.pow(minTranslate - nextScrollerTranslate, 0.8);
@@ -80,45 +131,40 @@ export default class extends PureComponent {
         nextScrollerTranslate = maxTranslate + Math.pow(nextScrollerTranslate - maxTranslate, 0.8);
       }
       return {
-        scrollerTranslate: nextScrollerTranslate
+        translate: nextScrollerTranslate
       };
     });
   };
 
   handleTouchEnd = (event) => {
-    if (!this.state.isMoving) {
-      return;
-    }
-    this.setState({
-      isMoving: false,
-      startTouchY: 0,
-      startScrollerTranslate: 0
-    });
-    setTimeout(() => {
+    if (this._isMoving) {
+      this._isMoving = false;
+      this.setState({
+        startTouchY: 0,
+        startScrollerTranslate: 0
+      });
       const {items, itemHeight} = this.props;
-      const {scrollerTranslate, minTranslate, maxTranslate} = this.state;
+      const {translate, minTranslate, maxTranslate} = this.state;
       let activeIndex;
-      if (scrollerTranslate > maxTranslate) {
+      if (translate > maxTranslate) {
         activeIndex = 0;
-      } else if (scrollerTranslate < minTranslate) {
+      } else if (translate < minTranslate) {
         activeIndex = items.length - 1;
       } else {
-        activeIndex = -Math.floor((scrollerTranslate - maxTranslate) / itemHeight);
+        activeIndex = -Math.floor((translate - maxTranslate) / itemHeight);
       }
       this.onValueSelected(items[activeIndex]);
-    }, 0);
+    }
   };
 
   handleTouchCancel = (event) => {
-    if (!this.state.isMoving) {
-      return;
+    if (this._isMoving) {
+      this.setState((startScrollerTranslate) => ({
+        startTouchY: 0,
+        startScrollerTranslate: 0,
+        translate: startScrollerTranslate
+      }));
     }
-    this.setState((startScrollerTranslate) => ({
-      isMoving: false,
-      startTouchY: 0,
-      startScrollerTranslate: 0,
-      scrollerTranslate: startScrollerTranslate
-    }));
   };
 
   handleItemClick = (option) => {
@@ -146,35 +192,18 @@ export default class extends PureComponent {
   }
 
   render() {
-    const {itemHeight, columnHeight} = this.props;
-    const translateString = `translate3d(0, ${this.state.scrollerTranslate}px, 0)`;
-    const style = {
-      height: columnHeight,
-      MsTransform: translateString,
-      MozTransform: translateString,
-      OTransform: translateString,
-      WebkitTransform: translateString,
-      transform: translateString
-    };
-    const highlightStyle = {
-      height: itemHeight,
-      marginTop: -(itemHeight / 2)
-    };
-    if (this.state.isMoving) {
-      style.transitionDuration = '0ms';
-    }
     return (
       <div className="react-select">
         <div
           className="react-select-scroller"
-          style={style}
+          style={this.rootStyle}
           onTouchStart={this.handleTouchStart}
           onTouchMove={this.handleTouchMove}
           onTouchEnd={this.handleTouchEnd}
           onTouchCancel={this.handleTouchCancel}>
           {this.renderItems()}
         </div>
-        <div className="react-select-highlight" style={highlightStyle}></div>
+        <div className="react-select-highlight" style={this.highlightStyle}></div>
       </div>
     )
   }
