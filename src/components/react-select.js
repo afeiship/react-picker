@@ -56,10 +56,9 @@ export default class extends PureComponent {
     return activeIndex;
   }
 
-  getNextScrollerTranslate(inCurrentY) {
-    const {startTouchY} = this.state;
-    const {startScrollerTranslate, minTranslate, maxTranslate}  = this.state;
-    let nextScrollerTranslate = startScrollerTranslate + inCurrentY - startTouchY;
+  get translate() {
+    const {minTranslate, maxTranslate}  = this.state;
+    let nextScrollerTranslate = this._initialTranslate + this._offsetY;
     if (nextScrollerTranslate < minTranslate) {
       nextScrollerTranslate = minTranslate - Math.pow(minTranslate - nextScrollerTranslate, 0.8);
     } else if (nextScrollerTranslate > maxTranslate) {
@@ -70,38 +69,33 @@ export default class extends PureComponent {
 
   constructor(props) {
     super(props);
-    this.state = {
-      isMoving: false,
-      startTouchY: 0,
-      startScrollerTranslate: 0,
-      ...this.computeTranslate(props)
-    };
+    this.initialState(props);
   }
 
   reset() {
     this._isMoving = false;
     this._startY = 0;
-    this._startTranslate = 0;
+    this._initialTranslate = 0;
     this._offsetY = 0;
   }
 
   componentWillReceiveProps(nextProps) {
-    if (this._isMoving) {
-      return;
+    if (!this._isMoving) {
+      this.initialState(nextProps);
     }
-    this.setState(this.computeTranslate(nextProps));
   }
 
-  computeTranslate(inProps) {
+  initialState(inProps) {
     const {items, value, itemHeight, columnHeight} = inProps;
-    let selectedIndex = items.indexOf(value);
-    if (selectedIndex < 0) {
+    let activeIndex = items.indexOf(value);
+    if (activeIndex < 0) {
       // throw new ReferenceError();
       this.onValueSelected(items[0]);
-      selectedIndex = 0;
+      activeIndex = 0;
     }
-    return {
-      translate: columnHeight / 2 - itemHeight / 2 - selectedIndex * itemHeight,
+    this.state = {
+      activeIndex: activeIndex,
+      translate: columnHeight / 2 - itemHeight / 2 - activeIndex * itemHeight,
       minTranslate: columnHeight / 2 - itemHeight * items.length + itemHeight / 2,
       maxTranslate: columnHeight / 2 - itemHeight / 2
     };
@@ -112,37 +106,21 @@ export default class extends PureComponent {
   };
 
   handleTouchStart = (event) => {
-    const startTouchY = event.targetTouches[0].pageY;
-    this.setState(({translate}) => ({
-      startTouchY,
-      startScrollerTranslate: translate
-    }));
+    this._startY = event.targetTouches[0].pageY;
+    this._initialTranslate = this.state.translate;
   };
 
   handleTouchMove = (event) => {
     event.preventDefault();
-    const touchY = event.targetTouches[0].pageY;
+    this._offsetY = event.targetTouches[0].pageY - this._startY;
     this._isMoving = true;
-    this.setState(({isMoving, startTouchY, startScrollerTranslate, minTranslate, maxTranslate}) => {
-      let nextScrollerTranslate = startScrollerTranslate + touchY - startTouchY;
-      if (nextScrollerTranslate < minTranslate) {
-        nextScrollerTranslate = minTranslate - Math.pow(minTranslate - nextScrollerTranslate, 0.8);
-      } else if (nextScrollerTranslate > maxTranslate) {
-        nextScrollerTranslate = maxTranslate + Math.pow(nextScrollerTranslate - maxTranslate, 0.8);
-      }
-      return {
-        translate: nextScrollerTranslate
-      };
-    });
+    this.setState({translate: this.translate});
   };
 
   handleTouchEnd = (event) => {
     if (this._isMoving) {
-      this._isMoving = false;
-      this.setState({
-        startTouchY: 0,
-        startScrollerTranslate: 0
-      });
+      this.reset();
+
       const {items, itemHeight} = this.props;
       const {translate, minTranslate, maxTranslate} = this.state;
       let activeIndex;
@@ -159,11 +137,7 @@ export default class extends PureComponent {
 
   handleTouchCancel = (event) => {
     if (this._isMoving) {
-      this.setState((startScrollerTranslate) => ({
-        startTouchY: 0,
-        startScrollerTranslate: 0,
-        translate: startScrollerTranslate
-      }));
+      this.setState({translate: this._initialTranslate}, this.reset);
     }
   };
 
@@ -174,7 +148,7 @@ export default class extends PureComponent {
   };
 
   renderItems() {
-    const {items, itemHeight, value} = this.props;
+    const {items, value} = this.props;
     return items.map((option, index) => {
       const className = `react-select-item${option === value ? ' react-select-item-selected' : ''}`;
       return (
