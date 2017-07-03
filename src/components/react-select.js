@@ -176,16 +176,12 @@ export default class extends PureComponent {
   renderItems() {
     const {items, itemHeight, value} = this.props;
     return items.map((option, index) => {
-      const style = {
-        height: itemHeight + 'px',
-        lineHeight: itemHeight + 'px'
-      };
       const className = `react-select-item${option === value ? ' react-select-item-selected' : ''}`;
       return (
         <div
           key={index}
           className={className}
-          style={style}
+          style={this.itemStyle}
           onClick={() => this.handleItemClick(option)}>{option}</div>
       );
     });
