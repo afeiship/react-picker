@@ -45,17 +45,6 @@ export default class extends PureComponent {
     };
   }
 
-  getActiveIndex(inProps) {
-    const {value, items} = inProps;
-    let activeIndex = -1;
-    items.forEach((item, index) => {
-      if (item.value === value) {
-        activeIndex = index;
-      }
-    });
-    return activeIndex;
-  }
-
   get translate() {
     const {minTranslate, maxTranslate}  = this.state;
     let nextScrollerTranslate = this._initialTranslate + this._offsetY;
@@ -65,6 +54,22 @@ export default class extends PureComponent {
       nextScrollerTranslate = maxTranslate + Math.pow(nextScrollerTranslate - maxTranslate, 0.8);
     }
     return nextScrollerTranslate;
+  }
+
+  get activeIndex() {
+    const {items, itemHeight, value} = this.props;
+    const {translate, minTranslate, maxTranslate} = this.state || {};
+    const initialActiveIndex = items.indexOf(value);
+    switch (true) {
+      case !translate:
+        return initialActiveIndex === -1 ? 0 : initialActiveIndex;
+      case translate > maxTranslate:
+        return 0;
+      case translate < minTranslate:
+        return items.length - 1;
+      default:
+        return -Math.floor((translate - maxTranslate) / itemHeight);
+    }
   }
 
   constructor(props) {
@@ -86,16 +91,9 @@ export default class extends PureComponent {
   }
 
   initialState(inProps) {
-    const {items, value, itemHeight, columnHeight} = inProps;
-    let activeIndex = items.indexOf(value);
-    if (activeIndex < 0) {
-      // throw new ReferenceError();
-      this.onValueSelected(items[0]);
-      activeIndex = 0;
-    }
+    const {items, itemHeight, columnHeight} = inProps;
     this.state = {
-      activeIndex: activeIndex,
-      translate: columnHeight / 2 - itemHeight / 2 - activeIndex * itemHeight,
+      translate: columnHeight / 2 - itemHeight / 2 - this.activeIndex * itemHeight,
       minTranslate: columnHeight / 2 - itemHeight * items.length + itemHeight / 2,
       maxTranslate: columnHeight / 2 - itemHeight / 2
     };
@@ -120,18 +118,8 @@ export default class extends PureComponent {
   handleTouchEnd = (event) => {
     if (this._isMoving) {
       this.reset();
-
-      const {items, itemHeight} = this.props;
-      const {translate, minTranslate, maxTranslate} = this.state;
-      let activeIndex;
-      if (translate > maxTranslate) {
-        activeIndex = 0;
-      } else if (translate < minTranslate) {
-        activeIndex = items.length - 1;
-      } else {
-        activeIndex = -Math.floor((translate - maxTranslate) / itemHeight);
-      }
-      this.onValueSelected(items[activeIndex]);
+      const {items} = this.props;
+      this.onValueSelected(items[this.activeIndex]);
     }
   };
 
