@@ -52,7 +52,7 @@ export default class extends PureComponent {
   };
 
   onValueSelected = (newValue) => {
-    this.props.onChange(this.props.name, newValue);
+    this.props.onChange( newValue);
   };
 
   handleTouchStart = (event) => {
