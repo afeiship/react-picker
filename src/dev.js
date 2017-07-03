@@ -25,7 +25,7 @@ class App extends React.Component {
         name={name}
         value={value}
         columnHeight={200}
-        itemHeight={36}
+        itemHeight={40}
         onChange={this.handleChange} />
     );
   }

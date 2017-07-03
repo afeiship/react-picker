@@ -5,16 +5,15 @@ import {PureComponent} from 'react';
 
 export default class extends PureComponent {
   static propTypes = {
-    items: PropTypes.array.isRequired,
-    name: PropTypes.string.isRequired,
-    value: PropTypes.any.isRequired,
-    itemHeight: PropTypes.number.isRequired,
-    columnHeight: PropTypes.number.isRequired,
-    onChange: PropTypes.func.isRequired
+    items: PropTypes.array,
+    name: PropTypes.string,
+    value: PropTypes.any,
+    itemHeight: PropTypes.number,
+    columnHeight: PropTypes.number,
+    onChange: PropTypes.func
   };
 
   constructor(props) {
-    console.log(props);
     super(props);
     this.state = {
       isMoving: false,
@@ -36,7 +35,7 @@ export default class extends PureComponent {
     let selectedIndex = items.indexOf(value);
     if (selectedIndex < 0) {
       // throw new ReferenceError();
-      console.warn('Warning: "' + this.props.name+ '" doesn\'t contain an option of "' + value + '".');
+      console.warn('Warning: "' + this.props.name + '" doesn\'t contain an option of "' + value + '".');
       this.onValueSelected(items[0]);
       selectedIndex = 0;
     }
@@ -48,7 +47,6 @@ export default class extends PureComponent {
   };
 
   onValueSelected = (newValue) => {
-    console.log(newValue);
     this.props.onChange(this.props.name, newValue);
   };
 
@@ -100,7 +98,7 @@ export default class extends PureComponent {
       } else if (scrollerTranslate < minTranslate) {
         activeIndex = items.length - 1;
       } else {
-        activeIndex = - Math.floor((scrollerTranslate - maxTranslate) / itemHeight);
+        activeIndex = -Math.floor((scrollerTranslate - maxTranslate) / itemHeight);
       }
       this.onValueSelected(items[activeIndex]);
     }, 0);
@@ -131,7 +129,7 @@ export default class extends PureComponent {
         height: itemHeight + 'px',
         lineHeight: itemHeight + 'px'
       };
-      const className = `picker-item${option === value ? ' picker-item-selected' : ''}`;
+      const className = `react-picker-column-item${option === value ? ' react-picker-column-item-selected' : ''}`;
       return (
         <div
           key={index}
@@ -143,7 +141,7 @@ export default class extends PureComponent {
   }
 
   render() {
-    const {itemHeight,columnHeight} = this.props;
+    const {itemHeight, columnHeight} = this.props;
     const translateString = `translate3d(0, ${this.state.scrollerTranslate}px, 0)`;
     const style = {
       height: columnHeight,
@@ -160,10 +158,10 @@ export default class extends PureComponent {
     if (this.state.isMoving) {
       style.transitionDuration = '0ms';
     }
-    return(
-      <div className="picker-column">
+    return (
+      <div className="react-picker-column">
         <div
-          className="picker-scroller"
+          className="react-picker-column-scroller"
           style={style}
           onTouchStart={this.handleTouchStart}
           onTouchMove={this.handleTouchMove}
@@ -171,7 +169,7 @@ export default class extends PureComponent {
           onTouchCancel={this.handleTouchCancel}>
           {this.renderItems()}
         </div>
-        <div className="picker-highlight" style={highlightStyle}></div>
+        <div className="react-picker-column-highlight" style={highlightStyle}></div>
       </div>
     )
   }

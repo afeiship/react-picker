@@ -1,4 +1,4 @@
-#react-picker
+#react-picker-column
 > Picker for react.
 
 
@@ -16,6 +16,4 @@
 
 
 ## usage:
-```html
-<react-picker :visible="true" />
-```
+
