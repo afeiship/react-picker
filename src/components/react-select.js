@@ -2,9 +2,12 @@ import './style.scss';
 
 import PropTypes from 'prop-types';
 import {PureComponent} from 'react';
+import classNames from 'classnames';
+
 
 export default class extends PureComponent {
   static propTypes = {
+    className: PropTypes.string,
     items: PropTypes.array,
     value: PropTypes.any,
     itemHeight: PropTypes.number,
@@ -47,18 +50,18 @@ export default class extends PureComponent {
 
   get translate() {
     const {minTranslate, maxTranslate}  = this.state;
-    let nextScrollerTranslate = this._initialTranslate + this._offsetY;
-    if (nextScrollerTranslate < minTranslate) {
-      nextScrollerTranslate = minTranslate - Math.pow(minTranslate - nextScrollerTranslate, 0.8);
-    } else if (nextScrollerTranslate > maxTranslate) {
-      nextScrollerTranslate = maxTranslate + Math.pow(nextScrollerTranslate - maxTranslate, 0.8);
+    let _translate = this.state.initialTranslate + this._offsetY;
+    if (_translate < minTranslate) {
+      _translate = minTranslate - Math.pow(minTranslate - _translate, 0.8);
+    } else if (_translate > maxTranslate) {
+      _translate = maxTranslate + Math.pow(_translate - maxTranslate, 0.8);
     }
-    return nextScrollerTranslate;
+    return _translate;
   }
 
   get activeIndex() {
-    const {items, itemHeight, value} = this.props;
-    const {translate, minTranslate, maxTranslate} = this.state || {};
+    const {items, itemHeight} = this.props;
+    const {translate, minTranslate, maxTranslate, value} = this.state || {};
     const initialActiveIndex = items.indexOf(value);
     switch (true) {
       case !translate:
@@ -80,29 +83,35 @@ export default class extends PureComponent {
   reset() {
     this._isMoving = false;
     this._startY = 0;
-    this._initialTranslate = 0;
     this._offsetY = 0;
+    this.setState({
+      initialTranslate: 0
+    })
   }
 
   componentWillReceiveProps(nextProps) {
     if (!this._isMoving) {
       this.initialState(nextProps);
+      this.setState(this.state);
     }
   }
 
   initialState(inProps) {
     const {items, itemHeight, columnHeight} = inProps;
     this.state = {
+      value: inProps.value,
       translate: columnHeight / 2 - itemHeight / 2 - this.activeIndex * itemHeight,
       minTranslate: columnHeight / 2 - itemHeight * items.length + itemHeight / 2,
       maxTranslate: columnHeight / 2 - itemHeight / 2
     };
   };
-  
+
 
   handleTouchStart = (event) => {
     this._startY = event.targetTouches[0].pageY;
-    this._initialTranslate = this.state.translate;
+    this.setState({
+      initialTranslate: this.state.translate
+    })
   };
 
   handleTouchMove = (event) => {
@@ -114,21 +123,24 @@ export default class extends PureComponent {
 
   handleTouchEnd = (event) => {
     if (this._isMoving) {
-      this.reset();
       const {items} = this.props;
+      // this.reset();
+
       this.handleChange(items[this.activeIndex]);
+      this.reset();
     }
   };
 
   handleTouchCancel = (event) => {
     if (this._isMoving) {
-      this.setState({translate: this._initialTranslate}, this.reset);
+      this.setState({translate: this.state.initialTranslate}, this.reset);
     }
   };
 
   handleItemClick = (option) => {
-    if (option !== this.props.value) {
+    if (option !== this.state.value) {
       this.handleChange(option);
+      this.setState({translate: this.translate});
     }
   };
 
@@ -137,13 +149,13 @@ export default class extends PureComponent {
   };
 
   renderItems() {
-    const {items, value} = this.props;
+    const {items} = this.props;
+    const {value} = this.state;
     return items.map((option, index) => {
-      const className = `react-select-item${option === value ? ' react-select-item-selected' : ''}`;
       return (
         <div
           key={index}
-          className={className}
+          className={classNames('react-select-item', {'react-select-item-selected': option === value})}
           style={this.itemStyle}
           onClick={() => this.handleItemClick(option)}>{option}</div>
       );
@@ -151,8 +163,9 @@ export default class extends PureComponent {
   }
 
   render() {
+    const {className, items, itemHeight, columnHeight, ...props} = this.props;
     return (
-      <div className="react-select">
+      <div {...props} className={classNames('react-select', className)}>
         <div
           className="react-select-scroller"
           style={this.rootStyle}
