@@ -3,9 +3,9 @@ import './style.scss';
 import PropTypes from 'prop-types';
 import {PureComponent} from 'react';
 
-class PickerColumn extends PureComponent {
+export default class extends PureComponent {
   static propTypes = {
-    options: PropTypes.array.isRequired,
+    items: PropTypes.array.isRequired,
     name: PropTypes.string.isRequired,
     value: PropTypes.any.isRequired,
     itemHeight: PropTypes.number.isRequired,
@@ -32,22 +32,23 @@ class PickerColumn extends PureComponent {
   }
 
   computeTranslate = (props) => {
-    const {options, value, itemHeight, columnHeight} = props;
-    let selectedIndex = options.indexOf(value);
+    const {items, value, itemHeight, columnHeight} = props;
+    let selectedIndex = items.indexOf(value);
     if (selectedIndex < 0) {
       // throw new ReferenceError();
       console.warn('Warning: "' + this.props.name+ '" doesn\'t contain an option of "' + value + '".');
-      this.onValueSelected(options[0]);
+      this.onValueSelected(items[0]);
       selectedIndex = 0;
     }
     return {
       scrollerTranslate: columnHeight / 2 - itemHeight / 2 - selectedIndex * itemHeight,
-      minTranslate: columnHeight / 2 - itemHeight * options.length + itemHeight / 2,
+      minTranslate: columnHeight / 2 - itemHeight * items.length + itemHeight / 2,
       maxTranslate: columnHeight / 2 - itemHeight / 2
     };
   };
 
   onValueSelected = (newValue) => {
+    console.log(newValue);
     this.props.onChange(this.props.name, newValue);
   };
 
@@ -91,17 +92,17 @@ class PickerColumn extends PureComponent {
       startScrollerTranslate: 0
     });
     setTimeout(() => {
-      const {options, itemHeight} = this.props;
+      const {items, itemHeight} = this.props;
       const {scrollerTranslate, minTranslate, maxTranslate} = this.state;
       let activeIndex;
       if (scrollerTranslate > maxTranslate) {
         activeIndex = 0;
       } else if (scrollerTranslate < minTranslate) {
-        activeIndex = options.length - 1;
+        activeIndex = items.length - 1;
       } else {
         activeIndex = - Math.floor((scrollerTranslate - maxTranslate) / itemHeight);
       }
-      this.onValueSelected(options[activeIndex]);
+      this.onValueSelected(items[activeIndex]);
     }, 0);
   };
 
@@ -124,8 +125,8 @@ class PickerColumn extends PureComponent {
   };
 
   renderItems() {
-    const {options, itemHeight, value} = this.props;
-    return options.map((option, index) => {
+    const {items, itemHeight, value} = this.props;
+    return items.map((option, index) => {
       const style = {
         height: itemHeight + 'px',
         lineHeight: itemHeight + 'px'
@@ -142,13 +143,19 @@ class PickerColumn extends PureComponent {
   }
 
   render() {
+    const {itemHeight,columnHeight} = this.props;
     const translateString = `translate3d(0, ${this.state.scrollerTranslate}px, 0)`;
     const style = {
+      height: columnHeight,
       MsTransform: translateString,
       MozTransform: translateString,
       OTransform: translateString,
       WebkitTransform: translateString,
       transform: translateString
+    };
+    const highlightStyle = {
+      height: itemHeight,
+      marginTop: -(itemHeight / 2)
     };
     if (this.state.isMoving) {
       style.transitionDuration = '0ms';
@@ -164,59 +171,8 @@ class PickerColumn extends PureComponent {
           onTouchCancel={this.handleTouchCancel}>
           {this.renderItems()}
         </div>
-      </div>
-    )
-  }
-}
-
-export default class Picker extends PureComponent {
-  static propTyps = {
-    optionGroups: PropTypes.object.isRequired,
-    valueGroups: PropTypes.object.isRequired,
-    onChange: PropTypes.func.isRequired,
-    itemHeight: PropTypes.number,
-    height: PropTypes.number
-  };
-
-  static defaultProps = {
-    itemHeight: 36,
-    height: 216
-  };
-
-  renderInner() {
-    const {optionGroups, valueGroups, itemHeight, height, onChange} = this.props;
-    const highlightStyle = {
-      height: itemHeight,
-      marginTop: -(itemHeight / 2)
-    };
-    const columnNodes = [];
-    for (let name in optionGroups) {
-      columnNodes.push(
-        <PickerColumn
-          key={name}
-          name={name}
-          options={optionGroups[name]}
-          value={valueGroups[name]}
-          itemHeight={itemHeight}
-          columnHeight={height}
-          onChange={onChange} />
-      );
-    }
-    return (
-      <div className="picker-inner">
-        {columnNodes}
         <div className="picker-highlight" style={highlightStyle}></div>
       </div>
-    );
-  }
-
-  render() {
-    return (
-      <div className="picker-container" style={{
-        height: this.props.height
-      }}>
-        {this.renderInner()}
-      </div>
-    );
+    )
   }
 }
