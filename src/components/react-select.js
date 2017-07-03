@@ -13,6 +13,11 @@ export default class extends PureComponent {
     onChange: PropTypes.func
   };
 
+  static defaultProps = {
+    itemHeight: 36,
+    columnHeight: 200
+  };
+
   constructor(props) {
     super(props);
     this.state = {
@@ -129,7 +134,7 @@ export default class extends PureComponent {
         height: itemHeight + 'px',
         lineHeight: itemHeight + 'px'
       };
-      const className = `react-picker-column-item${option === value ? ' react-picker-column-item-selected' : ''}`;
+      const className = `react-select-item${option === value ? ' react-select-item-selected' : ''}`;
       return (
         <div
           key={index}
@@ -159,9 +164,9 @@ export default class extends PureComponent {
       style.transitionDuration = '0ms';
     }
     return (
-      <div className="react-picker-column">
+      <div className="react-select">
         <div
-          className="react-picker-column-scroller"
+          className="react-select-scroller"
           style={style}
           onTouchStart={this.handleTouchStart}
           onTouchMove={this.handleTouchMove}
@@ -169,7 +174,7 @@ export default class extends PureComponent {
           onTouchCancel={this.handleTouchCancel}>
           {this.renderItems()}
         </div>
-        <div className="react-picker-column-highlight" style={highlightStyle}></div>
+        <div className="react-select-highlight" style={highlightStyle}></div>
       </div>
     )
   }

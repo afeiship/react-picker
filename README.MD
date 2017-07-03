@@ -1,4 +1,4 @@
-#react-picker-column
+#react-select
 > Picker for react.
 
 

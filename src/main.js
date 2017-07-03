@@ -1,2 +1,2 @@
-import ReactPickerColumn from 'components/react-picker-column';
-export default ReactPickerColumn;
+import ReactSelect from 'components/react-select';
+export default ReactSelect;
