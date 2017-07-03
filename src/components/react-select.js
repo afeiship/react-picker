@@ -98,10 +98,7 @@ export default class extends PureComponent {
       maxTranslate: columnHeight / 2 - itemHeight / 2
     };
   };
-
-  onValueSelected = (newValue) => {
-    this.props.onChange(newValue);
-  };
+  
 
   handleTouchStart = (event) => {
     this._startY = event.targetTouches[0].pageY;
@@ -119,7 +116,7 @@ export default class extends PureComponent {
     if (this._isMoving) {
       this.reset();
       const {items} = this.props;
-      this.onValueSelected(items[this.activeIndex]);
+      this.handleChange(items[this.activeIndex]);
     }
   };
 
@@ -131,8 +128,12 @@ export default class extends PureComponent {
 
   handleItemClick = (option) => {
     if (option !== this.props.value) {
-      this.onValueSelected(option);
+      this.handleChange(option);
     }
+  };
+
+  handleChange = inEvent => {
+    this.props.onChange(inEvent)
   };
 
   renderItems() {
