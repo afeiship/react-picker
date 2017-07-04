@@ -20,6 +20,20 @@ export default class extends PureComponent {
     columnHeight: 220
   };
 
+  static normalizeItems(inItems) {
+    const first = inItems[0];
+    if (typeof first !== 'object') {
+      return inItems.map((item, index) => {
+        return {
+          index,
+          value: item,
+          text: item
+        };
+      });
+    }
+    return inItems;
+  };
+
   get itemStyle() {
     const {itemHeight} = this.props;
     return {
@@ -87,6 +101,7 @@ export default class extends PureComponent {
       this.setState(this.state);
     }
   }
+
 
   initialState(inProps) {
     const {items, itemHeight, value, columnHeight} = inProps;

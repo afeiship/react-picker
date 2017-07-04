@@ -44,8 +44,9 @@ class App extends React.Component {
           "value": 11
         }
       ],
-      items: ['Mr.', 'Mrs.', 'Ms.', 'Dr.', 'Mr1.', 'Mrs1.', 'Ms1.', 'Dr1.', 'Mr2.', 'Mrs2.', 'Ms2.', 'Dr2.'],
-      value: 1
+      value1: 1,
+      value: 'Mr.',
+      items: Select.normalizeItems(['Mr.', 'Mrs.', 'Ms.', 'Dr.', 'Mr1.', 'Mrs1.', 'Ms1.', 'Dr1.', 'Mr2.', 'Mrs2.', 'Ms2.', 'Dr2.']),
     };
   }
 
@@ -56,11 +57,11 @@ class App extends React.Component {
   };
 
   render() {
-    const {items1, items, value} = this.state;
+    const {items1, value1, items, value} = this.state;
 
     return (
       <Select
-        items={items1}
+        items={items}
         value={value}
         onChange={this.handleChange}/>
     );
