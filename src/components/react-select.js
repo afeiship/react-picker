@@ -62,7 +62,7 @@ export default class extends PureComponent {
   get activeIndex() {
     const {items, itemHeight, value} = this.props;
     const {translate, minTranslate, maxTranslate} = this.state || {};
-    const initialActiveIndex = items.indexOf(value);
+    const initialActiveIndex = this.getIndex(items, value);
     switch (true) {
       case !translate:
         return initialActiveIndex === -1 ? 0 : initialActiveIndex;
@@ -79,6 +79,24 @@ export default class extends PureComponent {
     super(props);
     this.initialState(props);
   }
+
+
+  componentWillReceiveProps(nextProps) {
+    if (!this._isMoving) {
+      this.initialState(nextProps);
+      this.setState(this.state);
+    }
+  }
+
+  initialState(inProps) {
+    const {items, itemHeight, value, columnHeight} = inProps;
+    const activeIndex = this.getIndex(items, value);
+    this.state = {
+      translate: columnHeight / 2 - itemHeight / 2 - activeIndex * itemHeight,
+      minTranslate: columnHeight / 2 - itemHeight * items.length + itemHeight / 2,
+      maxTranslate: columnHeight / 2 - itemHeight / 2
+    };
+  };
 
   reset() {
     this._isMoving = false;
@@ -99,62 +117,48 @@ export default class extends PureComponent {
     return activeIndex;
   }
 
-  componentWillReceiveProps(nextProps) {
-    if (!this._isMoving) {
-      this.initialState(nextProps);
-      this.setState(this.state);
-    }
-  }
-
-  initialState(inProps) {
-    const {items, itemHeight, columnHeight} = inProps;
-    this.state = {
-      translate: columnHeight / 2 - itemHeight / 2 - this.activeIndex * itemHeight,
-      minTranslate: columnHeight / 2 - itemHeight * items.length + itemHeight / 2,
-      maxTranslate: columnHeight / 2 - itemHeight / 2
-    };
-  };
-
-
-  handleTouchStart = (event) => {
+  _onTouchStart = (event) => {
     this._startY = event.targetTouches[0].pageY;
     this.setState({
       initialTranslate: this.state.translate
     })
   };
 
-  handleTouchMove = (event) => {
+  _onTouchMove = (event) => {
     event.preventDefault();
     this._offsetY = event.targetTouches[0].pageY - this._startY;
     this._isMoving = true;
     this.setState({translate: this.translate});
   };
 
-  handleTouchEnd = (event) => {
+  _onTouchEnd = (inEvent) => {
     if (this._isMoving) {
-      const {items} = this.props;
-      this.handleChange(items[this.activeIndex]);
+      this._onChange();
       this.reset();
     }
   };
 
-  handleTouchCancel = (event) => {
+  _onTouchCancel = (inEvent) => {
     if (this._isMoving) {
       this.reset();
     }
   };
 
-  handleItemClick = (inIndex, item) => {
-    const {itemHeight, columnHeight, value} = this.props;
-    if (item !== value) {
-      this.setState({translate: columnHeight / 2 - itemHeight / 2 - inIndex * itemHeight,}, () => {
-        this.handleChange(item);
+  _onItemClick = (inEvent) => {
+    const index = inEvent.target.dataset.index * 1;
+    const {items, itemHeight, columnHeight} = this.props;
+    if (index !== this.activeIndex) {
+      this.setState({
+        translate: columnHeight / 2 - itemHeight / 2 - index * itemHeight,
+      }, () => {
+        this._onChange();
       });
     }
   };
 
-  handleChange = inEvent => {
-    this.props.onChange(inEvent);
+  _onChange = () => {
+    const {items, onChange} = this.props;
+    onChange({target: items[this.activeIndex]});
   };
 
   renderItems() {
@@ -165,23 +169,25 @@ export default class extends PureComponent {
           key={index}
           className={classNames('react-select-item', {'react-select-item-selected': index === this.activeIndex})}
           style={this.itemStyle}
-          onClick={() => this.handleItemClick(index, item)}>{item}</div>
+          data-value={item.value}
+          data-index={index}
+          onClick={this._onItemClick}>{item.text}</div>
       );
     });
   }
 
   render() {
-    const {className, items, itemHeight, columnHeight, ...props} = this.props;
+    const {className, value, items, itemHeight, columnHeight, ...props} = this.props;
     return (
       <div {...props} className={classNames('react-select', className)}>
         <div className="react-select-wrapper">
           <div
             className="react-select-scroller"
             style={this.rootStyle}
-            onTouchStart={this.handleTouchStart}
-            onTouchMove={this.handleTouchMove}
-            onTouchEnd={this.handleTouchEnd}
-            onTouchCancel={this.handleTouchCancel}>
+            onTouchStart={this._onTouchStart}
+            onTouchMove={this._onTouchMove}
+            onTouchEnd={this._onTouchEnd}
+            onTouchCancel={this._onTouchCancel}>
             {this.renderItems()}
           </div>
           <div className="react-select-highlight" style={this.highlightStyle}></div>

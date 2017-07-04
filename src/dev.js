@@ -44,22 +44,23 @@ class App extends React.Component {
           "value": 11
         }
       ],
-      items : ['Mr.', 'Mrs.', 'Ms.', 'Dr.','Mr1.', 'Mrs1.', 'Ms1.', 'Dr1.','Mr2.', 'Mrs2.', 'Ms2.', 'Dr2.'],
-      value: 'Mr.'
+      items: ['Mr.', 'Mrs.', 'Ms.', 'Dr.', 'Mr1.', 'Mrs1.', 'Ms1.', 'Dr1.', 'Mr2.', 'Mrs2.', 'Ms2.', 'Dr2.'],
+      value: 1
     };
   }
 
   // Update the value in response to user picking event
-  handleChange = (value) => {
+  handleChange = (inEvent) => {
+    const {value} = inEvent.target;
     this.setState({value});
   };
 
   render() {
-    const {items, value} = this.state;
+    const {items1, items, value} = this.state;
 
     return (
       <Select
-        items={items}
+        items={items1}
         value={value}
         onChange={this.handleChange}/>
     );
