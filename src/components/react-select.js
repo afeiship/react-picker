@@ -60,8 +60,8 @@ export default class extends PureComponent {
   }
 
   get activeIndex() {
-    const {items, itemHeight} = this.props;
-    const {translate, minTranslate, maxTranslate, value} = this.state || {};
+    const {items, itemHeight, value} = this.props;
+    const {translate, minTranslate, maxTranslate} = this.state || {};
     const initialActiveIndex = items.indexOf(value);
     switch (true) {
       case !translate:
@@ -89,6 +89,16 @@ export default class extends PureComponent {
     })
   }
 
+  getIndex(inItems, inValue) {
+    let activeIndex = -1;
+    inItems.forEach((item, index) => {
+      if (item.value === inValue) {
+        activeIndex = index;
+      }
+    });
+    return activeIndex;
+  }
+
   componentWillReceiveProps(nextProps) {
     if (!this._isMoving) {
       this.initialState(nextProps);
@@ -99,7 +109,6 @@ export default class extends PureComponent {
   initialState(inProps) {
     const {items, itemHeight, columnHeight} = inProps;
     this.state = {
-      value: inProps.value,
       translate: columnHeight / 2 - itemHeight / 2 - this.activeIndex * itemHeight,
       minTranslate: columnHeight / 2 - itemHeight * items.length + itemHeight / 2,
       maxTranslate: columnHeight / 2 - itemHeight / 2
@@ -124,8 +133,6 @@ export default class extends PureComponent {
   handleTouchEnd = (event) => {
     if (this._isMoving) {
       const {items} = this.props;
-      // this.reset();
-
       this.handleChange(items[this.activeIndex]);
       this.reset();
     }
@@ -137,27 +144,28 @@ export default class extends PureComponent {
     }
   };
 
-  handleItemClick = (option) => {
-    if (option !== this.state.value) {
-      this.handleChange(option);
-      this.setState({translate: this.translate});
+  handleItemClick = (inIndex, item) => {
+    const {itemHeight, columnHeight, value} = this.props;
+    if (item !== value) {
+      this.setState({translate: columnHeight / 2 - itemHeight / 2 - inIndex * itemHeight,}, () => {
+        this.handleChange(item);
+      });
     }
   };
 
   handleChange = inEvent => {
-    this.props.onChange(inEvent)
+    this.props.onChange(inEvent);
   };
 
   renderItems() {
-    const {items} = this.props;
-    const {value} = this.state;
-    return items.map((option, index) => {
+    const {items, value} = this.props;
+    return items.map((item, index) => {
       return (
         <div
           key={index}
-          className={classNames('react-select-item', {'react-select-item-selected': option === value})}
+          className={classNames('react-select-item', {'react-select-item-selected': item === value})}
           style={this.itemStyle}
-          onClick={() => this.handleItemClick(option)}>{option}</div>
+          onClick={() => this.handleItemClick(index, item)}>{item}</div>
       );
     });
   }

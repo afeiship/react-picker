@@ -45,7 +45,6 @@ class App extends React.Component {
         }
       ],
       items : ['Mr.', 'Mrs.', 'Ms.', 'Dr.','Mr1.', 'Mrs1.', 'Ms1.', 'Dr1.','Mr2.', 'Mrs2.', 'Ms2.', 'Dr2.'],
-      name: 'title',
       value: 'Mr.'
     };
   }
@@ -56,12 +55,11 @@ class App extends React.Component {
   };
 
   render() {
-    const {items, name, value} = this.state;
+    const {items, value} = this.state;
 
     return (
       <Select
         items={items}
-        name={name}
         value={value}
         onChange={this.handleChange}/>
     );
