@@ -17,7 +17,7 @@ export default class extends PureComponent {
 
   static defaultProps = {
     itemHeight: 36,
-    columnHeight: 200
+    columnHeight: 220
   };
 
   get itemStyle() {
@@ -140,7 +140,7 @@ export default class extends PureComponent {
 
   handleTouchCancel = (event) => {
     if (this._isMoving) {
-      this.setState({translate: this.state.initialTranslate}, this.reset);
+      this.reset();
     }
   };
 
@@ -158,12 +158,12 @@ export default class extends PureComponent {
   };
 
   renderItems() {
-    const {items, value} = this.props;
+    const {items} = this.props;
     return items.map((item, index) => {
       return (
         <div
           key={index}
-          className={classNames('react-select-item', {'react-select-item-selected': item === value})}
+          className={classNames('react-select-item', {'react-select-item-selected': index === this.activeIndex})}
           style={this.itemStyle}
           onClick={() => this.handleItemClick(index, item)}>{item}</div>
       );
@@ -174,16 +174,18 @@ export default class extends PureComponent {
     const {className, items, itemHeight, columnHeight, ...props} = this.props;
     return (
       <div {...props} className={classNames('react-select', className)}>
-        <div
-          className="react-select-scroller"
-          style={this.rootStyle}
-          onTouchStart={this.handleTouchStart}
-          onTouchMove={this.handleTouchMove}
-          onTouchEnd={this.handleTouchEnd}
-          onTouchCancel={this.handleTouchCancel}>
-          {this.renderItems()}
+        <div className="react-select-wrapper">
+          <div
+            className="react-select-scroller"
+            style={this.rootStyle}
+            onTouchStart={this.handleTouchStart}
+            onTouchMove={this.handleTouchMove}
+            onTouchEnd={this.handleTouchEnd}
+            onTouchCancel={this.handleTouchCancel}>
+            {this.renderItems()}
+          </div>
+          <div className="react-select-highlight" style={this.highlightStyle}></div>
         </div>
-        <div className="react-select-highlight" style={this.highlightStyle}></div>
       </div>
     )
   }
