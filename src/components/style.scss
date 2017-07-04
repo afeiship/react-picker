@@ -1,4 +1,4 @@
-.react-select {
+.react-picker {
   flex: 1 1;
   position: relative;
   overflow: hidden;
@@ -26,7 +26,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
 
-    &.react-select-item-selected {
+    &.react-picker-item-selected {
       color: #000;
     }
   }

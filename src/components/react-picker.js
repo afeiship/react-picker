@@ -167,7 +167,7 @@ export default class extends PureComponent {
       return (
         <div
           key={index}
-          className={classNames('react-select-item', {'react-select-item-selected': index === this.activeIndex})}
+          className={classNames('react-picker-item', {'react-picker-item-selected': index === this.activeIndex})}
           style={this.itemStyle}
           data-value={item.value}
           data-index={index}
@@ -179,10 +179,10 @@ export default class extends PureComponent {
   render() {
     const {className, value, items, itemHeight, columnHeight, ...props} = this.props;
     return (
-      <div {...props} className={classNames('react-select', className)}>
-        <div className="react-select-wrapper">
+      <div {...props} className={classNames('react-picker', className)}>
+        <div className="react-picker-wrapper">
           <div
-            className="react-select-scroller"
+            className="react-picker-scroller"
             style={this.rootStyle}
             onTouchStart={this._onTouchStart}
             onTouchMove={this._onTouchMove}
@@ -190,7 +190,7 @@ export default class extends PureComponent {
             onTouchCancel={this._onTouchCancel}>
             {this.renderItems()}
           </div>
-          <div className="react-select-highlight" style={this.highlightStyle}></div>
+          <div className="react-picker-highlight" style={this.highlightStyle}></div>
         </div>
       </div>
     )

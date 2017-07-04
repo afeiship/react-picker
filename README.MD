@@ -1,4 +1,4 @@
-#react-select
+#react-picker
 > Picker for react.
 
 

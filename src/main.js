@@ -1,2 +1,2 @@
-import ReactSelect from 'components/react-select';
-export default ReactSelect;
+import ReactPicker from 'components/react-picker';
+export default ReactPicker;

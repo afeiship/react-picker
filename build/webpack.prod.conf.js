@@ -9,8 +9,8 @@ base.entry = {
 base.output = {
   path: config.build.assetsRoot,
   publicPath: config.build.assetsPublicPath,
-  filename: 'react-select.js',
-  library: 'ReactSelect',
+  filename: 'react-picker.js',
+  library: 'ReactPicker',
   libraryTarget: 'umd'
 }
 
