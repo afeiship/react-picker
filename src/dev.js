@@ -1,4 +1,4 @@
-import Select from './main';
+import Picker from './main';
 import './dev.scss';
 
 class App extends React.Component {
@@ -46,7 +46,8 @@ class App extends React.Component {
       ],
       value1: 1,
       value: 'Mr.',
-      items: Select.normalizeItems(['Mr.', 'Mrs.', 'Ms.', 'Dr.', 'Mr1.', 'Mrs1.', 'Ms1.', 'Dr1.', 'Mr2.', 'Mrs2.', 'Ms2.', 'Dr2.']),
+      items2:[1,2,3,4,5,6,7,8,9,10,11,12],
+      items: Picker.normalizeItems(['Mr.', 'Mrs.', 'Ms.', 'Dr.', 'Mr1.', 'Mrs1.', 'Ms1.', 'Dr1.', 'Mr2.', 'Mrs2.', 'Ms2.', 'Dr2.']),
     };
   }
 
@@ -56,14 +57,25 @@ class App extends React.Component {
     this.setState({value});
   };
 
+  _click1 = e => {
+    this.setState({
+      items: Picker.normalizeItems(this.state.items2),
+      value:2
+    });
+  };
+
   render() {
     const {items1, value1, items, value} = this.state;
 
     return (
-      <Select
-        items={items}
-        value={value}
-        onChange={this.handleChange}/>
+      <div className="hello-picker">
+        <button onClick={this._click1}>Update items</button>
+        <div className="blank"></div>
+        <Picker
+          items={items}
+          value={value}
+          onChange={this.handleChange}/>
+      </div>
     );
   }
 }

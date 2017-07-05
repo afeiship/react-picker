@@ -1,1 +1,25 @@
-*{margin:0;padding:0;-webkit-margin-before:0;-webkit-margin-after:0;}
+*{
+  margin:0;padding:0;
+  box-sizing: border-box;
+}
+
+.hello-picker{
+  button{
+    border:none;
+    width:90%;
+    display: block;
+    padding:10px;
+    margin:0 auto;
+    background: #4cd964;
+    color:#fff;
+    border-radius: 5px;
+
+    &:focus{
+      outline:none;
+    }
+  }
+
+  .blank{
+    height:30px;
+  }
+}
