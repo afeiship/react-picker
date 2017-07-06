@@ -54,7 +54,8 @@ class App extends React.Component {
   // Update the value in response to user picking event
   handleChange = (inEvent) => {
     const {value} = inEvent.target;
-    this.setState({value});
+    // this.setState({value});
+    console.log('change...');
   };
 
   _click1 = e => {

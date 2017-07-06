@@ -3,6 +3,7 @@ import './style.scss';
 import PropTypes from 'prop-types';
 import {PureComponent} from 'react';
 import classNames from 'classnames';
+import objectAssign from 'object-assign';
 
 
 export default class extends PureComponent {
@@ -33,6 +34,8 @@ export default class extends PureComponent {
     }
     return inItems;
   };
+
+  state = {};
 
   get itemStyle() {
     const {itemHeight} = this.props;
@@ -74,12 +77,9 @@ export default class extends PureComponent {
   }
 
   get activeIndex() {
-    const {items, itemHeight, value} = this.props;
-    const {translate, minTranslate, maxTranslate} = this.state || {};
-    const initialActiveIndex = this.getIndex(items, value);
+    const {items, itemHeight} = this.props;
+    const {translate, minTranslate, maxTranslate} = this.state;
     switch (true) {
-      case !translate:
-        return initialActiveIndex === -1 ? 0 : initialActiveIndex;
       case translate > maxTranslate:
         return 0;
       case translate < minTranslate:
@@ -89,31 +89,20 @@ export default class extends PureComponent {
     }
   }
 
-  constructor(props) {
-    super(props);
-    this.initialState(props);
+  getInitialActiveIndex(inProps) {
+    const {items} = inProps;
+    const {value} = objectAssign(this.state, inProps);
+    let activeIndex = -1;
+    items.forEach((item, index) => {
+      if (item.value === value) {
+        activeIndex = index;
+      }
+    });
+    return activeIndex;
   }
 
 
-  componentWillReceiveProps(nextProps) {
-    if (!this._isMoving) {
-      this.initialState(nextProps);
-      this.setState(this.state);
-    }
-  }
-
-
-  initialState(inProps) {
-    const {items, itemHeight, value, columnHeight} = inProps;
-    const activeIndex = this.getIndex(items, value);
-    this.state = {
-      translate: columnHeight / 2 - itemHeight / 2 - activeIndex * itemHeight,
-      minTranslate: columnHeight / 2 - itemHeight * items.length + itemHeight / 2,
-      maxTranslate: columnHeight / 2 - itemHeight / 2
-    };
-  };
-
-  reset() {
+  rollback() {
     this._isMoving = false;
     this._startY = 0;
     this._offsetY = 0;
@@ -132,6 +121,31 @@ export default class extends PureComponent {
     return activeIndex;
   }
 
+
+  constructor(props) {
+    super(props);
+    this.initialState(props);
+  }
+
+  componentWillReceiveProps(nextProps) {
+    if (!this._isMoving) {
+      this.initialState(nextProps);
+      this.setState(this.state);
+    }
+  }
+
+
+  initialState(inProps) {
+    const {items, itemHeight, value, columnHeight} = inProps;
+    const activeIndex = this.getInitialActiveIndex(inProps);
+    this.state = {
+      activeIndex, value,
+      translate: columnHeight / 2 - itemHeight / 2 - activeIndex * itemHeight,
+      minTranslate: columnHeight / 2 - itemHeight * items.length + itemHeight / 2,
+      maxTranslate: columnHeight / 2 - itemHeight / 2
+    };
+  };
+
   _onTouchStart = (event) => {
     this._startY = event.targetTouches[0].pageY;
     this.setState({
@@ -143,25 +157,28 @@ export default class extends PureComponent {
     event.preventDefault();
     this._offsetY = event.targetTouches[0].pageY - this._startY;
     this._isMoving = true;
-    this.setState({translate: this.translate});
+    this.setState({
+      activeIndex: this.activeIndex,
+      translate: this.translate
+    });
   };
 
   _onTouchEnd = (inEvent) => {
     if (this._isMoving) {
       this._onChange();
-      this.reset();
+      this.rollback();
     }
   };
 
   _onTouchCancel = (inEvent) => {
     if (this._isMoving) {
-      this.reset();
+      this.rollback();
     }
   };
 
   _onItemClick = (inEvent) => {
     const index = inEvent.target.dataset.index * 1;
-    const {items, itemHeight, columnHeight} = this.props;
+    const {itemHeight, columnHeight} = this.props;
     if (index !== this.activeIndex) {
       this.setState({
         translate: columnHeight / 2 - itemHeight / 2 - index * itemHeight,
@@ -173,7 +190,19 @@ export default class extends PureComponent {
 
   _onChange = () => {
     const {items, onChange} = this.props;
-    onChange({target: items[this.activeIndex]});
+    const {value} = items[this.activeIndex];
+
+    if (this.state.value !== value) {
+      this.state.value = value;
+      this.initialState(objectAssign({...this.props}, this.state));
+      this.setState(this.state, () => {
+        onChange({target: {value}});
+      });
+    } else {
+      this.initialState(objectAssign({...this.props}, this.state));
+      this.setState(this.state);
+    }
+
   };
 
   renderItems() {
