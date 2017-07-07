@@ -25,8 +25,11 @@
     color: #707274;
     overflow: hidden;
     text-overflow: ellipsis;
+    font-size:16px;
+    transition: font-size 0.2s;
 
     &.react-picker-item-selected {
+      font-size:18px;
       color: #000;
     }
   }
