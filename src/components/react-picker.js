@@ -89,6 +89,22 @@ export default class extends PureComponent {
     }
   }
 
+
+  get children() {
+    const {items} = this.props;
+    return items.map((item, index) => {
+      return (
+        <div
+          key={index}
+          className={classNames('react-picker-item', {'react-picker-item-selected': index === this.activeIndex})}
+          style={this.itemStyle}
+          data-value={item.value}
+          data-index={index}
+          onClick={this._onItemClick}>{item.text}</div>
+      );
+    });
+  }
+
   getInitialActiveIndex(inProps) {
     const {items} = inProps;
     const {value} = objectAssign(this.state, inProps);
@@ -111,17 +127,6 @@ export default class extends PureComponent {
     })
   }
 
-  getIndex(inItems, inValue) {
-    let activeIndex = -1;
-    inItems.forEach((item, index) => {
-      if (item.value === inValue) {
-        activeIndex = index;
-      }
-    });
-    return activeIndex;
-  }
-
-
   constructor(props) {
     super(props);
     this.initialState(props);
@@ -134,13 +139,12 @@ export default class extends PureComponent {
     }
   }
 
-
   initialState(inProps) {
     const {items, itemHeight, value, columnHeight} = inProps;
-    const activeIndex = this.getInitialActiveIndex(inProps);
+    const initialActiveIndex = this.getInitialActiveIndex(inProps);
     this.state = {
-      activeIndex, value,
-      translate: columnHeight / 2 - itemHeight / 2 - activeIndex * itemHeight,
+      value,
+      translate: columnHeight / 2 - itemHeight / 2 - initialActiveIndex * itemHeight,
       minTranslate: columnHeight / 2 - itemHeight * items.length + itemHeight / 2,
       maxTranslate: columnHeight / 2 - itemHeight / 2
     };
@@ -202,23 +206,7 @@ export default class extends PureComponent {
       this.initialState(objectAssign({...this.props}, this.state));
       this.setState(this.state);
     }
-
   };
-
-  renderItems() {
-    const {items} = this.props;
-    return items.map((item, index) => {
-      return (
-        <div
-          key={index}
-          className={classNames('react-picker-item', {'react-picker-item-selected': index === this.activeIndex})}
-          style={this.itemStyle}
-          data-value={item.value}
-          data-index={index}
-          onClick={this._onItemClick}>{item.text}</div>
-      );
-    });
-  }
 
   render() {
     const {className, value, items, itemHeight, columnHeight, ...props} = this.props;
@@ -232,7 +220,7 @@ export default class extends PureComponent {
             onTouchMove={this._onTouchMove}
             onTouchEnd={this._onTouchEnd}
             onTouchCancel={this._onTouchCancel}>
-            {this.renderItems()}
+            {this.children}
           </div>
           <div className="react-picker-highlight" style={this.highlightStyle}></div>
         </div>
